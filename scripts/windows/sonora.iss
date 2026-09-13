@@ -1,5 +1,6 @@
 #define AppName "Sonora"
-#define AppPublisher "Sonora"
+#define AppPublisher "switchblade"
+#define AppURL "https://github.com/switchb1ade/sonora"
 #define AppExeName "sonora.exe"
 #define AppVersion GetEnv("SONORA_VERSION")
 #define SourceExe GetEnv("SONORA_EXE")
@@ -14,6 +15,9 @@ AppId={{8D65C17E-79E8-46D7-9A37-42E85E73F738}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
+AppPublisherURL={#AppURL}
+AppSupportURL={#AppURL}
+AppUpdatesURL={#AppURL}
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
