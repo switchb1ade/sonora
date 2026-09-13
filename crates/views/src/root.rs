@@ -79,6 +79,7 @@ pub struct Root {
     background: Option<gpui::WindowBackgroundAppearance>,
     #[cfg(target_os = "windows")]
     rounded: Option<ui::Rounding>,
+    fullscreen_entered_window: bool,
 }
 
 impl Root {
@@ -257,6 +258,7 @@ impl Root {
             background: None,
             #[cfg(target_os = "windows")]
             rounded: None,
+            fullscreen_entered_window: false,
         };
         root.show(start, cx);
         root
@@ -363,15 +365,31 @@ impl Root {
             .update(cx, |workspace, cx| workspace.show_side(tab, cx));
     }
 
-    fn toggle_fullscreen(&mut self, cx: &mut Context<Self>) {
+    fn toggle_fullscreen(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         match self.view {
-            RootView::Workspace => navigate(Destination::Fullscreen, cx),
-            RootView::Fullscreen => back(cx),
+            RootView::Workspace => {
+                navigate(Destination::Fullscreen, cx);
+                if !window.is_fullscreen() {
+                    self.fullscreen_entered_window = true;
+                    window.toggle_fullscreen();
+                }
+            }
+            RootView::Fullscreen => {
+                if self.fullscreen_entered_window && window.is_fullscreen() {
+                    window.toggle_fullscreen();
+                }
+                self.fullscreen_entered_window = false;
+                back(cx);
+            }
         }
     }
 
-    fn dismiss(&mut self, cx: &mut Context<Self>) {
+    fn dismiss(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if matches!(self.view, RootView::Fullscreen) {
+            if self.fullscreen_entered_window && window.is_fullscreen() {
+                window.toggle_fullscreen();
+            }
+            self.fullscreen_entered_window = false;
             back(cx);
         }
     }
@@ -652,19 +670,21 @@ impl Render for Root {
             .on_action(cx.listener(|this, _: &OpenFilter, window, cx| this.open_filter(window, cx)))
             .on_action(cx.listener(|this, _: &OpenSearch, _, cx| this.open_search(cx)))
             .on_action(cx.listener(|this, _: &OpenSettings, _, cx| this.open_settings(cx)))
-            .on_action(cx.listener(|this, _: &ToggleFullscreen, _, cx| this.toggle_fullscreen(cx)))
+            .on_action(cx.listener(|this, _: &ToggleFullscreen, window, cx| this.toggle_fullscreen(window, cx)))
             .on_action(|_: &CloseWindow, window, _| window.remove_window())
             .on_action(|_: &MinimizeWindow, window, _| window.minimize_window())
             .on_action(|_: &ZoomWindow, window, _| window.zoom_window())
             .on_action(|_: &ToggleWindowFullscreen, window, _| window.toggle_fullscreen())
-            .on_action(cx.listener(|this, _: &Dismiss, _, cx| this.dismiss(cx)))
+            .on_action(cx.listener(|this, _: &Dismiss, window, cx| this.dismiss(window, cx)))
             .on_action(
                 cx.listener(|this, _: &ToggleQueue, _, cx| this.show_side(SideTab::Queue, cx)),
             )
             .on_action(
                 cx.listener(|this, _: &ToggleLyrics, _, cx| this.show_side(SideTab::Lyrics, cx)),
             )
-            .child(self.title_bar.clone())
+            .when(!matches!(self.view, RootView::Fullscreen), |this| {
+                this.child(self.title_bar.clone())
+            })
             .when_else(
                 show_sign_in,
                 |this| this.child(div().flex().flex_1().min_h_0().child(self.login.clone())),

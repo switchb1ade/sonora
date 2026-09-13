@@ -413,9 +413,12 @@ unsafe extern "system" fn work_area(
         GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromWindow,
     };
     use windows_sys::Win32::UI::Shell::DefSubclassProc;
-    use windows_sys::Win32::UI::WindowsAndMessaging::{MINMAXINFO, WM_GETMINMAXINFO};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GWL_STYLE, GetWindowLongPtrW, MINMAXINFO, WM_GETMINMAXINFO, WS_THICKFRAME,
+    };
 
     unsafe {
+        let result = DefSubclassProc(handle, message, wparam, lparam);
         if message == WM_GETMINMAXINFO {
             let monitor = MonitorFromWindow(handle, MONITOR_DEFAULTTONEAREST);
             let mut monitor_info: MONITORINFO = std::mem::zeroed();
@@ -423,13 +426,28 @@ unsafe extern "system" fn work_area(
             if GetMonitorInfoW(monitor, &mut monitor_info) != 0 {
                 let (screen, work) = (monitor_info.rcMonitor, monitor_info.rcWork);
                 let info = &mut *(lparam as *mut MINMAXINFO);
-                info.ptMaxPosition.x += work.left - screen.left;
-                info.ptMaxPosition.y += work.top - screen.top;
-                info.ptMaxSize.x -= (screen.right - screen.left) - (work.right - work.left);
-                info.ptMaxSize.y -= (screen.bottom - screen.top) - (work.bottom - work.top);
+                let style = GetWindowLongPtrW(handle, GWL_STYLE) as u32;
+                let is_fullscreen = (style & WS_THICKFRAME) == 0;
+
+                if is_fullscreen {
+                    info.ptMaxPosition.x = 0;
+                    info.ptMaxPosition.y = 0;
+                    info.ptMaxSize.x = screen.right - screen.left;
+                    info.ptMaxSize.y = screen.bottom - screen.top;
+                    info.ptMaxTrackSize.x = (screen.right - screen.left).max(info.ptMaxTrackSize.x);
+                    info.ptMaxTrackSize.y = (screen.bottom - screen.top).max(info.ptMaxTrackSize.y);
+                } else {
+                    info.ptMaxPosition.x = work.left - screen.left;
+                    info.ptMaxPosition.y = work.top - screen.top;
+                    info.ptMaxSize.x = work.right - work.left;
+                    info.ptMaxSize.y = work.bottom - work.top;
+                    info.ptMaxTrackSize.x = (screen.right - screen.left).max(info.ptMaxTrackSize.x);
+                    info.ptMaxTrackSize.y = (screen.bottom - screen.top).max(info.ptMaxTrackSize.y);
+                }
             }
+            return 0;
         }
-        DefSubclassProc(handle, message, wparam, lparam)
+        result
     }
 }
 
