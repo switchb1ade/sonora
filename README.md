@@ -12,6 +12,8 @@
 ### A native music streaming client, built with Rust and GPUI
 
 Stream Spotify, YouTube Music, Subsonic/Navidrome and local files all in one **native** app
+
+*Fork maintained by [switchblade](https://github.com/switchb1ade)*
 </div>
 
 <div align="center">
@@ -181,9 +183,13 @@ AI-assisted proofreading and translation of human-written text are permitted.
 </a>
 
 ## Credits
-
-Sonora is built with the help of some incredible open-source projects, including:
-
+ 
+This fork is maintained by [switchblade](https://github.com/switchb1ade).
+ 
+Sonora is built with the help of some incredible open-source projects and authors:
+ 
+- [switchblade](https://github.com/switchb1ade) — maintainer of this fork.
+- [Sonora Core Team](https://github.com/sonorahq/sonora) — original Sonora project authors.
 - [Zed](https://github.com/zed-industries/zed) — a wonderful editor (~~ab~~)used by all core team members. Conveniently provides `gpui` — their native Rust rendering stack.
 - [librespot](https://github.com/librespot-org/librespot) — Spotify playback and library integration.
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) — certain YouTube ideas implemented in [ytmusic-rs](https://github.com/sonorahq/ytmusic-rs) :)

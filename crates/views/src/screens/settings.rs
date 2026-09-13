@@ -27,7 +27,7 @@ use ui::{
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const LICENSE_URL: &str = "https://www.gnu.org/licenses/gpl-3.0.html";
-const SOURCE_URL: &str = "https://github.com/sonorahq/sonora";
+const SOURCE_URL: &str = "https://github.com/switchb1ade/sonora";
 
 const THEMES: &str = "themes";
 const PACKS: &str = "packs";
@@ -125,8 +125,9 @@ macro_rules! member {
     };
 }
 
-const MEMBERS: [Member; 5] = [
-    member!("nolight132", Role::LeadMaintainer),
+const MEMBERS: [Member; 6] = [
+    member!("switchb1ade", Role::LeadMaintainer),
+    member!("nolight132", Role::Maintainer),
     member!("zxsleebu", Role::Maintainer),
     member!("fx-got", Role::Maintainer),
     member!("Makakashan", Role::Contributor),

@@ -6,7 +6,8 @@ members = ["crates/*"]
 version = "0.34.4"
 edition = "2024"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/sonorahq/sonora"
+authors = ["switchblade <rajdipsaha31@gmail.com>"]
+repository = "https://github.com/switchb1ade/sonora"
 
 [workspace.dependencies]
 embed = { path = "crates/embed" }
